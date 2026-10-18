@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm run lint -- --format junit --output-file eslint-junit.xml || true
+      - run: npm run lint
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eslint-report
+          path: eslint-junit.xml
+          if-no-files-found: ignore
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          cd MaximizeWindowIntoNewWorkspace
+          zip -r ../MaximizeWindowIntoNewWorkspace.zip .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MaximizeWindowIntoNewWorkspace
+          path: MaximizeWindowIntoNewWorkspace.zip
